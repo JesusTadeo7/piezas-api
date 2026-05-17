@@ -1,0 +1,6 @@
+@piezas_carros_HostAddress = http://localhost:5112
+
+GET {{piezas_carros_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
