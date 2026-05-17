@@ -3,11 +3,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
 // 🔌 conexión a SQL Server
-var conn = Environment.GetEnvironmentVariable("DATABASE_URL");
-
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(conn, o =>
-        o.EnableRetryOnFailure()
+    options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL")));
 
 // swagger
 builder.Services.AddEndpointsApiExplorer();
