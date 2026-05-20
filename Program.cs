@@ -69,41 +69,19 @@ app.MapDelete("/piezas/{id}", async (int id, AppDbContext db) =>
 
 
 // =======================
-// 🔐 LOGIN
-// =======================
-app.MapPost("/login", async (User input, AppDbContext db) =>
-{
-    var user = await db.Users
-        .FirstOrDefaultAsync(u =>
-            u.Username == input.Username &&
-            u.Password == input.Password);
-
-    if (user == null)
-        return Results.Unauthorized();
-
-    return Results.Ok(new
-    {
-        user.Username,
-        user.Role
-    });
-});
-
-
-// =======================
-// 👤 USERS (ADMIN CONTROL)
+// 👤 USERS (ALTA / BAJA)
 // =======================
 
 // GET usuarios
 app.MapGet("/users", async (AppDbContext db) =>
+    await db.Users.ToListAsync());
+
+// POST usuario (CREAR)
+app.MapPost("/users", async (User user, AppDbContext db) =>
 {
-    try
-    {
-        return Results.Ok(await db.Users.ToListAsync());
-    }
-    catch (Exception ex)
-    {
-        return Results.Problem(ex.ToString());
-    }
+    db.Users.Add(user);
+    await db.SaveChangesAsync();
+    return Results.Ok(user);
 });
 
 // DELETE usuario
