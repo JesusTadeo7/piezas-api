@@ -90,7 +90,7 @@ app.MapPost("/login", async (User input, AppDbContext db) =>
 
 
 // =======================
-// 👤 USERS (ADMIN)
+// 👤 USERS (ADMIN CONTROL)
 // =======================
 
 // GET usuarios
@@ -141,9 +141,16 @@ class Pieza
 [Table("users")]
 class User
 {
+    [Column("id")]
     public int Id { get; set; }
+
+    [Column("username")]
     public string Username { get; set; } = "";
+
+    [Column("password")]
     public string Password { get; set; } = "";
+
+    [Column("role")]
     public string Role { get; set; } = "";
 }
 
