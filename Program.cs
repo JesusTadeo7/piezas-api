@@ -2,7 +2,7 @@
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🔌 conexión a SQL Server
+// 🔌 conexión a PostgreSQL (Render)
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(Environment.GetEnvironmentVariable("DATABASE_URL")));
 
@@ -16,20 +16,22 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 
-//  GET todos
+// =======================
+// 🔵 CRUD PIEZAS
+// =======================
+
+// GET todos
 app.MapGet("/piezas", async (AppDbContext db) =>
     await db.Piezas.ToListAsync());
 
-
-//  GET por ID
+// GET por ID
 app.MapGet("/piezas/{id}", async (int id, AppDbContext db) =>
 {
     var pieza = await db.Piezas.FindAsync(id);
     return pieza is not null ? Results.Ok(pieza) : Results.NotFound();
 });
 
-
-//  POST (crear)
+// POST
 app.MapPost("/piezas", async (Pieza pieza, AppDbContext db) =>
 {
     db.Piezas.Add(pieza);
@@ -37,8 +39,7 @@ app.MapPost("/piezas", async (Pieza pieza, AppDbContext db) =>
     return Results.Ok(pieza);
 });
 
-
-//  PUT (editar)
+// PUT
 app.MapPut("/piezas/{id}", async (int id, Pieza input, AppDbContext db) =>
 {
     var pieza = await db.Piezas.FindAsync(id);
@@ -54,8 +55,7 @@ app.MapPut("/piezas/{id}", async (int id, Pieza input, AppDbContext db) =>
     return Results.Ok(pieza);
 });
 
-
-//  DELETE
+// DELETE
 app.MapDelete("/piezas/{id}", async (int id, AppDbContext db) =>
 {
     var pieza = await db.Piezas.FindAsync(id);
@@ -67,10 +67,34 @@ app.MapDelete("/piezas/{id}", async (int id, AppDbContext db) =>
 });
 
 
+// =======================
+// 🔐 LOGIN SIMPLE
+// =======================
+app.MapPost("/login", async (User input, AppDbContext db) =>
+{
+    var user = await db.Users
+        .FirstOrDefaultAsync(u =>
+            u.Username == input.Username &&
+            u.Password == input.Password);
+
+    if (user == null)
+        return Results.Unauthorized();
+
+    return Results.Ok(new
+    {
+        user.Username,
+        user.Role
+    });
+});
+
+
 app.Run();
 
 
-//  modelo
+// =======================
+// 📦 MODELOS
+// =======================
+
 class Pieza
 {
     public int Id { get; set; }
@@ -81,11 +105,23 @@ class Pieza
     public string? Tipo { get; set; }
 }
 
+class User
+{
+    public int Id { get; set; }
+    public string Username { get; set; } = "";
+    public string Password { get; set; } = "";
+    public string Role { get; set; } = "";
+}
 
-//  contexto
+
+// =======================
+// 🧠 DB CONTEXT
+// =======================
+
 class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<Pieza> Piezas => Set<Pieza>();
+    public DbSet<User> Users => Set<User>();
 }
