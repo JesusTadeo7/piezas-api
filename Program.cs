@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,7 +69,7 @@ app.MapDelete("/piezas/{id}", async (int id, AppDbContext db) =>
 
 
 // =======================
-// 🔐 LOGIN SIMPLE
+// 🔐 LOGIN
 // =======================
 app.MapPost("/login", async (User input, AppDbContext db) =>
 {
@@ -89,14 +90,23 @@ app.MapPost("/login", async (User input, AppDbContext db) =>
 
 
 // =======================
-// 👤 USERS (ADMIN CONTROL)
+// 👤 USERS (ADMIN)
 // =======================
 
-// GET todos los usuarios
+// GET usuarios
 app.MapGet("/users", async (AppDbContext db) =>
-    await db.Users.ToListAsync());
+{
+    try
+    {
+        return Results.Ok(await db.Users.ToListAsync());
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem(ex.ToString());
+    }
+});
 
-// DELETE usuario por ID
+// DELETE usuario
 app.MapDelete("/users/{id}", async (int id, AppDbContext db) =>
 {
     var user = await db.Users.FindAsync(id);
@@ -128,6 +138,7 @@ class Pieza
     public string? Tipo { get; set; }
 }
 
+[Table("users")]
 class User
 {
     public int Id { get; set; }
