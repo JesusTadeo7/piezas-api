@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -85,6 +85,29 @@ app.MapPost("/login", async (User input, AppDbContext db) =>
         user.Username,
         user.Role
     });
+});
+
+
+// =======================
+// 👤 USERS (ADMIN CONTROL)
+// =======================
+
+// GET todos los usuarios
+app.MapGet("/users", async (AppDbContext db) =>
+    await db.Users.ToListAsync());
+
+// DELETE usuario por ID
+app.MapDelete("/users/{id}", async (int id, AppDbContext db) =>
+{
+    var user = await db.Users.FindAsync(id);
+
+    if (user is null)
+        return Results.NotFound();
+
+    db.Users.Remove(user);
+    await db.SaveChangesAsync();
+
+    return Results.Ok();
 });
 
 
