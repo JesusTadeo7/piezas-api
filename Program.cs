@@ -99,6 +99,28 @@ app.MapDelete("/users/{id}", async (int id, AppDbContext db) =>
 });
 
 
+// =======================
+// 🔐 LOGIN (NUEVO)
+// =======================
+app.MapPost("/login", async (User input, AppDbContext db) =>
+{
+    var user = await db.Users
+        .FirstOrDefaultAsync(u =>
+            u.Username == input.Username &&
+            u.Password == input.Password);
+
+    if (user is null)
+        return Results.Unauthorized();
+
+    return Results.Ok(new
+    {
+        user.Id,
+        user.Username,
+        user.Role
+    });
+});
+
+
 app.Run();
 
 
